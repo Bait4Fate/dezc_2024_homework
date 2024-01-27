@@ -8,15 +8,39 @@ terraform {
 }
 
 provider "google" {
-  credentials = file("de-zoomcamp-2024-412511-fc13c2a4ab86.json")
-
-  project = "./de-zoomcamp-2024-412511"
+  project = "de-zoomcamp-2024-412511"
   region  = "us-central1"
-  zone    = "us-central1-c"
 }
 
-variable "project" {
-  description = "Your GCP Project ID"
-  default = "de-zoomcamp-2024-412511"
-  type = string
+
+
+resource "google_storage_bucket" "data-lake-bucket" {
+  name          = "b4f_bucket"
+  location      = "US"
+
+  # Optional, but recommended settings:
+  storage_class = "STANDARD"
+  uniform_bucket_level_access = true
+
+  versioning {
+    enabled     = true
+  }
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 30  // days
+    }
+  }
+
+  force_destroy = true
+}
+
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "bigquery_data"
+  project    = "de-zoomcamp-2024-412511"
+  location   = "US"
 }
